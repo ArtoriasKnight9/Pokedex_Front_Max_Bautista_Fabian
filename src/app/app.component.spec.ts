@@ -1,10 +1,16 @@
 import { TestBed } from '@angular/core/testing';
 import { AppComponent } from './app.component';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AppComponent],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     }).compileComponents();
   });
 
@@ -14,16 +20,12 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'pokedex_front_Max_Bautista_Fabian' title`, () => {
+  it('should return correct color for pokemon types', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('pokedex_front_Max_Bautista_Fabian');
-  });
-
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, pokedex_front_Max_Bautista_Fabian');
+    
+    expect(app.getTypeColor('Fuego')).toBe('#F08030');
+    expect(app.getTypeColor('Agua')).toBe('#6890F0');
+    expect(app.getTypeColor('Desconocido')).toBe('#3b4cca'); // Valor por defecto
   });
 });

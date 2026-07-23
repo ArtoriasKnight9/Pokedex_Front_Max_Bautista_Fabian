@@ -2,12 +2,31 @@
 :host {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #333;
+  display: block;
+  min-height: 100vh;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)), 
+    url('../assets/pokemon-forest-background.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
 }
+
 
 .pokedex-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+}
+
+.icono {
+  width: 65px;       
+  height: 65px;
+  margin: 0 auto; /* Esto centrará el ícono sobre tu título */
+  background-image: url('../assets/Pokeicon.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 .header {
@@ -71,9 +90,41 @@
 /* --- CONTROLES DEL PANEL (Formulario y Filtro) --- */
 .header-content {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center; /* Esto fuerza al título a quedarse en el centro exacto */
+  width: 100%;
 }
+
+.header-content button {
+  align-self: flex-start; /* Esto empuja únicamente al botón hacia la izquierda */
+}
+
+.header-content h1 {
+  margin-top: 10px;
+  margin-bottom: 0;
+  color: #e3350d;
+}
+
+.dashboard-section {
+  margin-bottom: 20px;
+}
+
+.dashboard-filters-row {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+}
+
+.dashboard-filters-row .control-card {
+  flex: 1;
+  min-width: 250px; /* Se adaptará perfectamente en pantallas chicas */
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+}
+
 
 .dashboard-controls {
   display: flex;
@@ -87,8 +138,24 @@
   padding: 20px;
   border-radius: 12px;
   border: 1px solid #e0e0e0;
-  flex: 1;
   min-width: 300px;
+}
+
+.register-section {
+  flex: 2; 
+}
+
+.register-full-card {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  width: 100%;
+}
+
+.filter-section {
+  flex: 1; 
+  max-width: 200px; 
 }
 
 .control-card h3 {
@@ -110,6 +177,7 @@ input, .filter-select {
   font-size: 1rem;
   flex: 1;
   min-width: 120px;
+  width: 100%;
 }
 
 /* --- BOTONES GLOBALES --- */
@@ -188,6 +256,24 @@ button:hover {
 .card-body {
   padding: 15px;
   flex-grow: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center; 
+}
+
+.pokemon-info p {
+  margin: 8px 0;
+}
+
+.pokemon-sprite img {
+  width: 150px; 
+  height: 150px;
+  object-fit: contain;
+  image-rendering: pixelated; 
+  background-color: #f1f2f6;
+  border-radius: 50%;
+  padding: 5px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .card-body p {
@@ -206,4 +292,22 @@ button:hover {
   display: flex;
   justify-content: space-between;
   border-top: 1px solid #eee;
+}
+
+.hp-container {
+  margin: 8px 0;
+}
+
+.hp-bar-background {
+  width: 100%;
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.hp-bar-fill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
 }

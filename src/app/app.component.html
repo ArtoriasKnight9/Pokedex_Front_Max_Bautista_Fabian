@@ -1,36 +1,37 @@
 <main class="pokedex-container">
-  
+
   <!-- PANTALLA 1: SELECCIÓN DE ENTRENADOR -->
   @if (!activeTrainer) {
-    <div class="welcome-screen">
-      <h1 class="main-title">Bienvenido al Sistema Pokédex </h1>
-      <p class="subtitle">Por favor, selecciona tu perfil de entrenador para comenzar:</p>
-      
-      <div class="trainer-grid">
-        @for (trainer of trainers; track trainer.uuid_trainer) {
-          <article class="trainer-card" (click)="selectTrainer(trainer)">
-            <h2>{{ trainer.name_trainer }}</h2>
-            <p><strong>Región:</strong> {{ trainer.region_trainer }}</p>
-            <p><strong>Edad:</strong> {{ trainer.age_trainer }} años</p>
-            <button class="btn-primary select-btn">Entrar</button>
-          </article>
-        }
-      </div>
+  <div class="welcome-screen">
+    <div class="icono"></div>
+    <h1 class="main-title">Bienvenido al Sistema Pokédex </h1>
+    <p class="subtitle">Por favor, selecciona tu perfil de entrenador para comenzar:</p>
+
+    <div class="trainer-grid">
+      @for (trainer of trainers; track trainer.uuid_trainer) {
+      <article class="trainer-card" (click)="selectTrainer(trainer)">
+        <h2>{{ trainer.name_trainer }}</h2>
+        <p><strong>Región:</strong> {{ trainer.region_trainer }}</p>
+        <p><strong>Edad:</strong> {{ trainer.age_trainer }} años</p>
+        <button class="btn-primary select-btn">Entrar</button>
+      </article>
+      }
     </div>
-  } 
-  
+  </div>
+  }
+
   <!-- PANTALLA 2: PANEL PRINCIPAL (Solo visible si hay un entrenador activo) -->
   @else {
-    <header class="header">
-      <div class="header-content">
-        <button class="btn-danger btn-sm" (click)="logout()">⬅ Cambiar Entrenador</button>
-        <h1>Pokédex de {{ activeTrainer.name_trainer }}</h1>
-      </div>
-    </header>
+  <header class="header">
+    <div class="header-content">
+      <button class="btn-danger btn-sm" (click)="logout()">⬅ Cambiar Entrenador</button>
+      <h1>Pokédex de {{ activeTrainer.name_trainer }}</h1>
+    </div>
+  </header>
 
-    <section class="dashboard-controls">
-      <!-- Formulario de Registro (Ya no pide entrenador) -->
-      <div class="control-card register-section">
+  <!-- Formulario de Registro (Ancho completo) -->
+    <section class="dashboard-section">
+      <div class="control-card register-full-card">
         <h3>Registrar Pokémon para {{ activeTrainer.name_trainer }}</h3>
         <div class="form-group">
           <input type="text" [(ngModel)]="newPokemon.name_pokemon" placeholder="Nombre (ej. Pikachu)">
@@ -39,45 +40,83 @@
           <button class="btn-primary" (click)="registerPokemon()">Guardar</button>
         </div>
       </div>
+    </section>
 
-      <!-- Filtro -->
-      <div class="control-card filter-section">
+    <!-- Controles de Búsqueda, Filtro y Ordenamiento (Fila independiente) -->
+    <section class="dashboard-filters-row">
+      <!-- Buscador por Nombre -->
+      <div class="control-card">
+        <h3>Buscar Pokémon</h3>
+        <input type="text" [(ngModel)]="searchTerm" (input)="applyFilter()" placeholder="Ej. Charmander..." class="filter-select">
+      </div>
+
+      <!-- Filtro por Tipo -->
+      <div class="control-card">
         <h3>Filtrar por Tipo</h3>
         <select [(ngModel)]="selectedType" (change)="applyFilter()" class="filter-select">
           <option value="">Todos los tipos</option>
-          @for (type of types; track type) {
+          @for (type of types; track $index) {
             <option [value]="type">{{ type }}</option>
           }
         </select>
       </div>
-    </section>
 
-    <!-- Mensaje si no hay registros -->
-    @if (filteredPokemons.length === 0) {
-      <div class="empty-state">
-        <h2>No tienes Pokémon de este tipo.</h2>
-        <p>¡Intenta cambiar el filtro o registra uno nuevo!</p>
+      <!-- Ordenar por -->
+      <div class="control-card">
+        <h3>Ordenar por</h3>
+        <select [(ngModel)]="sortCriteria" (change)="onSortChange()" class="filter-select">
+          <option value="name">Nombre (A-Z)</option>
+          <option value="level">Nivel (Más fuerte)</option>
+        </select>
       </div>
-    }
-
-    <!-- Grid de Tarjetas -->
-    <section class="pokemon-grid">
-      @for (pokemon of filteredPokemons; track pokemon.uuid_pokemon) {
-        <article class="pokemon-card">
-          <div class="card-header">
-            <h2 class="pokemon-name">{{ pokemon.name_pokemon }}</h2>
-            <span class="type-badge">{{ pokemon.type_pokemon }}</span>
-          </div>
-          <div class="card-body">
-            <p><strong>Nivel: </strong> <span class="level-text">{{ pokemon.level_pokemon }}</span></p>
-            <p><strong>Captura: </strong> {{ pokemon.captureDate }}</p>
-          </div>
-          <div class="card-footer">
-            <button class="btn-success" (click)="levelUp(pokemon)">Subir Nivel</button>
-            <button class="btn-danger" (click)="deletePokemon(pokemon.uuid_pokemon)">Liberar</button>
-          </div>
-        </article>
-      }
     </section>
+
+  <!-- Mensaje si no hay registros -->
+  @if (filteredPokemons.length === 0) {
+  <div class="empty-state">
+    <h2>No tienes Pokémon de este tipo.</h2>
+    <p>¡Intenta cambiar el filtro o registra uno nuevo!</p>
+  </div>
+  }
+
+  <!-- Grid de Tarjetas -->
+  <section class="pokemon-grid">
+    @for (pokemon of filteredPokemons; track pokemon.uuid_pokemon) {
+    <article class="pokemon-card">
+      <div class="card-header" [style.backgroundColor]="getTypeColor(pokemon.type_pokemon)">
+        <h2 class="pokemon-name">{{ pokemon.name_pokemon }}</h2>
+        <span class="type-badge">{{ pokemon.type_pokemon }}</span>
+      </div>
+      <div class="card-body">
+
+        <!-- Sección Izquierda: Datos -->
+        <div class="pokemon-info">
+          <div class="hp-container">
+            <p><strong>Nivel: </strong> <span class="level-text">{{ pokemon.level_pokemon }}</span></p>
+   
+            <div class="hp-bar-background">
+              <div class="hp-bar-fill"
+                [style.width.%]="(pokemon.level_pokemon * 5 > 100 ? 100 : pokemon.level_pokemon * 5)"
+                [style.background-color]="pokemon.level_pokemon > 10 ? '#4caf50' : '#f44336'">
+              </div>
+            </div>
+          </div>
+          <p><strong>Captura: </strong> {{ pokemon.captureDate }}</p>
+        </div>
+
+        <!-- Sección Derecha: Sprite Pixel Art -->
+        <div class="pokemon-sprite">
+          <!-- Si ocurre un error (ej. escriben mal el nombre), se pone la pokébola -->
+          <img #imgRef [src]="getPokemonSprite(pokemon.name_pokemon)" alt="{{ pokemon.name_pokemon }}"
+            (error)="imgRef.src='assets/Pokeicon.svg'">
+        </div>
+      </div>
+      <div class="card-footer">
+        <button class="btn-success" (click)="levelUp(pokemon)">Subir Nivel</button>
+        <button class="btn-danger" (click)="deletePokemon(pokemon.uuid_pokemon)">Liberar</button>
+      </div>
+    </article>
+    }
+  </section>
   }
 </main>
