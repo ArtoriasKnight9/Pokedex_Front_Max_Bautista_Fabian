@@ -3,6 +3,7 @@
   <!-- PANTALLA 1: SELECCIÓN DE ENTRENADOR -->
   @if (!activeTrainer) {
     <div class="welcome-screen">
+      <div class="icono"></div>
       <h1 class="main-title">Bienvenido al Sistema Pokédex </h1>
       <p class="subtitle">Por favor, selecciona tu perfil de entrenador para comenzar:</p>
       
@@ -45,7 +46,7 @@
         <h3>Filtrar por Tipo</h3>
         <select [(ngModel)]="selectedType" (change)="applyFilter()" class="filter-select">
           <option value="">Todos los tipos</option>
-          @for (type of types; track type) {
+          @for (type of types; track $index) {
             <option [value]="type">{{ type }}</option>
           }
         </select>
@@ -64,13 +65,26 @@
     <section class="pokemon-grid">
       @for (pokemon of filteredPokemons; track pokemon.uuid_pokemon) {
         <article class="pokemon-card">
-          <div class="card-header">
+         <div class="card-header" [style.backgroundColor]="getTypeColor(pokemon.type_pokemon)">
             <h2 class="pokemon-name">{{ pokemon.name_pokemon }}</h2>
             <span class="type-badge">{{ pokemon.type_pokemon }}</span>
           </div>
           <div class="card-body">
-            <p><strong>Nivel: </strong> <span class="level-text">{{ pokemon.level_pokemon }}</span></p>
-            <p><strong>Captura: </strong> {{ pokemon.captureDate }}</p>
+            <!-- Sección Izquierda: Datos -->
+            <div class="pokemon-info">
+              <p><strong>Nivel: </strong> <span class="level-text">{{ pokemon.level_pokemon }}</span></p>
+              <p><strong>Captura: </strong> {{ pokemon.captureDate }}</p>
+            </div>
+            
+            <!-- Sección Derecha: Sprite Pixel Art -->
+            <div class="pokemon-sprite">
+              <!-- Si ocurre un error (ej. escriben mal el nombre), se pone la pokébola -->
+              <img 
+                #imgRef
+                [src]="getPokemonSprite(pokemon.name_pokemon)" 
+                alt="{{ pokemon.name_pokemon }}" 
+                (error)="imgRef.src='assets/Pokeicon.svg'">
+            </div>
           </div>
           <div class="card-footer">
             <button class="btn-success" (click)="levelUp(pokemon)">Subir Nivel</button>

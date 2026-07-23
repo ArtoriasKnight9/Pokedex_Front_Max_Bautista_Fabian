@@ -44,13 +44,11 @@ export class AppComponent implements OnInit {
   }
 
   loadPokemons() {
-    this.pokemonService.getPokemons().subscribe({
-      next: (data) => {
-        this.pokemons = data;
-        this.extractTypes();
-        this.applyFilter();
-      },
-      error: (err) => console.error('Error al cargar Pokémon', err)
+    this.pokemonService.getPokemons().subscribe(data => {
+      this.pokemons = data;
+      this.pokemons.sort((a, b) => a.name_pokemon.localeCompare(b.name_pokemon));
+      this.extractTypes();
+      this.applyFilter();
     });
   }
 
@@ -74,14 +72,15 @@ export class AppComponent implements OnInit {
   }
 
   applyFilter() {
+    const allTypes = this.pokemons.map(p => p.type_pokemon);
+    this.types = [...new Set(allTypes)];
+
     let result = this.pokemons;
 
-    // 1. Filtrar por el entrenador activo (si hay uno)
     if (this.activeTrainer) {
       result = result.filter(p => p.trainerOwner.uuid_trainer === this.activeTrainer!.uuid_trainer);
     }
 
-    // 2. Aplicar el filtro de tipo (Agua, Fuego, etc.)
     if (this.selectedType) {
       result = result.filter(p => p.type_pokemon === this.selectedType);
     }
@@ -89,25 +88,75 @@ export class AppComponent implements OnInit {
     this.filteredPokemons = result;
   }
 
-  registerPokemon() {
-    if(this.newPokemon.name_pokemon && this.newPokemon.type_pokemon) {
-      this.pokemonService.registerPokemon(this.newPokemon as Pokemon).subscribe(() => {
-        this.loadPokemons(); 
-        this.newPokemon.name_pokemon = '';
-        this.newPokemon.type_pokemon = '';
-        this.newPokemon.level_pokemon = 1;
-      });
-    } else {
-      alert('Por favor, ingresa un nombre y un tipo.');
-    }
+  getTypeColor(type: string): string {
+    if (!type) return '#3b4cca'; 
+
+    // Agregamos .trim() para limpiar espacios fantasma al inicio o final
+    const t = type.toLowerCase().trim();
+
+    if (t.includes('fuego')) return '#F08030';      
+    if (t.includes('agua')) return '#6890F0';       
+    if (t.includes('planta')) return '#78C850';     
+    if (t.includes('eléctrico') || t.includes('electrico')) return '#F8D030'; 
+    if (t.includes('fantasma')) return '#705898';   
+    if (t.includes('bicho')) return '#A8B820';      
+    if (t.includes('veneno')) return '#A040A0';     
+    if (t.includes('lucha')) return '#C03028';      
+    if (t.includes('normal')) return '#A8A878';     
+    if (t.includes('volador')) return '#A890F0';    
+    if (t.includes('tierra')) return '#E0C068';     
+    if (t.includes('roca')) return '#B8A038';       
+    if (t.includes('hielo')) return '#98D8D8';      
+    if (t.includes('psíquico') || t.includes('psiquico')) return '#F85888'; 
+    if (t.includes('dragón') || t.includes('dragon')) return '#7038F8';     
+
+    return '#3b4cca'; 
   }
 
-  levelUp(pokemon: Pokemon) {
-    if(pokemon.uuid_pokemon) {
-      this.pokemonService.levelUpPokemon(pokemon.uuid_pokemon, pokemon.level_pokemon + 1).subscribe(() => {
-         this.loadPokemons();
-      });
+  getPokemonSprite(name: string): string {
+    if (!name) return '/assets/Pokeicon.svg'; 
+    const cleanName = name.toLowerCase().trim().replace(/\s+/g, '');
+
+    return `https://play.pokemonshowdown.com/sprites/gen1/${cleanName}.png`;
+
+  }
+
+  registerPokemon() {
+
+    if (!this.newPokemon.name_pokemon || this.newPokemon.name_pokemon.trim() === '') {
+      alert('Introduce nombre del pokemon que capturaste');
+      return; 
     }
+
+    if (!this.newPokemon.type_pokemon || this.newPokemon.type_pokemon.trim() === '') {
+      alert('Por favor, indica el tipo de tu Pokémon (ej. Fuego, Agua)');
+      return; 
+    }
+
+    if (!this.newPokemon.level_pokemon || this.newPokemon.level_pokemon < 1) {
+      alert('El nivel del Pokémon debe ser al menos 1');
+      return;
+    }
+
+    this.pokemonService.registerPokemon(this.newPokemon as Pokemon).subscribe(() => {
+      this.loadPokemons(); 
+      
+      // Limpiamos los campos del formulario para el siguiente registro
+      this.newPokemon.name_pokemon = '';
+      this.newPokemon.type_pokemon = '';
+      this.newPokemon.level_pokemon = 1;
+    });
+  }
+
+ levelUp(pokemon: any) {
+    const newLevel = pokemon.level_pokemon + 1;
+
+    this.pokemonService.levelUpPokemon(pokemon.uuid_pokemon, newLevel).subscribe(() => {
+      
+      alert(`¡Subiste un nivel a ${pokemon.name_pokemon}! Ahora es nivel ${newLevel}.`);
+      
+      this.loadPokemons(); 
+    });
   }
 
   deletePokemon(uuid: string | undefined) {
@@ -119,4 +168,7 @@ export class AppComponent implements OnInit {
       });
     }
   }
+
+
+
 }
