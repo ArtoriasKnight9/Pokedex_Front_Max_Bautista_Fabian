@@ -22,7 +22,7 @@
 .icono {
   width: 65px;       
   height: 65px;
-  margin: 0 auto; /* Esto centrará el ícono sobre tu título */
+  margin: 0 auto; 
   background-image: url('../assets/Pokeicon.svg');
   background-size: contain;
   background-repeat: no-repeat;
